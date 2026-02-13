@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npx --yes create-next-app@latest:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss@latest:*)",
+      "Bash(node -e:*)",
+      "Bash(npx next build:*)"
+    ]
+  }
+}
