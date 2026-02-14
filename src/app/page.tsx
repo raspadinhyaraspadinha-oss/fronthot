@@ -6,7 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import VideoGrid from "@/components/layout/VideoGrid";
 import MainOverlay from "@/components/overlay/MainOverlay";
 import ToastContainer, { showToast } from "@/components/ui/Toast";
-import { captureUTMs } from "@/lib/utm";
+import { captureUTMs, getStoredUTMs, getFBP, buildFBC } from "@/lib/utm";
 import { initFacebookPixel, trackPixelEvent, generateEventId } from "@/lib/pixel";
 import type { Video } from "@/data/videos";
 
@@ -17,7 +17,7 @@ export default function Home() {
 
   // Initialize UTMs, Pixel, and track PageView
   useEffect(() => {
-    captureUTMs();
+    const utms = captureUTMs();
 
     const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
     if (pixelId) {
@@ -25,7 +25,11 @@ export default function Home() {
       const eventId = generateEventId();
       trackPixelEvent("PageView", {}, eventId);
 
-      // Also send server-side CAPI PageView
+      // Build fbc/fbp for CAPI user matching
+      const fbp = getFBP();
+      const fbc = buildFBC(utms.fbclid);
+
+      // Server-side CAPI PageView with UTMs + fbc + fbp
       fetch("/api/track-event", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,6 +37,13 @@ export default function Home() {
           eventName: "PageView",
           eventId,
           eventSourceUrl: window.location.href,
+          userData: {
+            ...(fbc ? { fbc } : {}),
+            ...(fbp ? { fbp } : {}),
+          },
+          customData: {
+            ...utms,
+          },
         }),
       }).catch(() => {});
     }

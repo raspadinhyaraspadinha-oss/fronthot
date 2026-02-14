@@ -7,7 +7,8 @@
       "Bash(npm install:*)",
       "Bash(npx tailwindcss@latest:*)",
       "Bash(node -e:*)",
-      "Bash(npx next build:*)"
+      "Bash(npx next build:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

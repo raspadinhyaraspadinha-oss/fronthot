@@ -45,16 +45,16 @@ export const plans: Plan[] = [
   {
     id: "black",
     name: "Black",
-    price: 2990,
-    priceDisplay: "R$ 29,90",
+    price: 4990,
+    priceDisplay: "R$ 49,90",
     period: "30 dias",
     features: [
-      "Acesso ilimitado completo",
-      "Qualidade máxima (4K)",
-      "Suporte VIP 24h",
+      "Acesso ilimitado completo(+ de 140.000 videos vazados)",
+      "Qualidade máxima (4K) + Download Habilitado",
+      "Conteúdos de classe especial: os vazados mais proibidos e raros.",
     ],
-    slotsTotal: 100,
-    slotsFilled: 98,
+    slotsTotal: 50,
+    slotsFilled: 48,
     badge: "Quase esgotado",
   },
 ];

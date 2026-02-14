@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     status: session.status,
+    planId: session.planId,
     paidAt: session.paidAt || null,
   });
 }
