@@ -2,9 +2,16 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "StreamVault — Conteúdo Exclusivo Premium",
+  title: "Vazados Proibidos — Conteúdos Exclusivos e Hackeados",
   description:
-    "Acesse conteúdo exclusivo e premium. Assine agora e desbloqueie o melhor da plataforma.",
+    "Vídeos vazados e hackeados que você só encontra aqui. Acesso ilimitado a +140.000 conteúdos exclusivos e proibidos. Assine agora!",
+  keywords: "vazados, conteúdo exclusivo, vídeos proibidos, acesso premium, conteúdo hackeado",
+  openGraph: {
+    title: "Vazados Proibidos — Acesso Exclusivo",
+    description: "Conteúdos vazados que você nunca viu. +140.000 vídeos exclusivos.",
+    type: "website",
+    locale: "pt_BR",
+  },
 };
 
 export const viewport: Viewport = {

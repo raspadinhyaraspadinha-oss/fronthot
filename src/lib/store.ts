@@ -39,3 +39,18 @@ export function updateSession(
 export function deleteSession(id: string): void {
   sessions.delete(id);
 }
+
+export function findSessionByPaymentCode(
+  paymentCode: string
+): PaymentSession | undefined {
+  for (const session of sessions.values()) {
+    const meta = session.metadata as Record<string, unknown> | undefined;
+    if (
+      meta?.paymentCode === paymentCode ||
+      meta?.externalCode === paymentCode
+    ) {
+      return session;
+    }
+  }
+  return undefined;
+}

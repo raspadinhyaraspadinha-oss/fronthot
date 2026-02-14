@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, updateSession } from "@/lib/store";
+import { getSession, updateSession, findSessionByPaymentCode } from "@/lib/store";
 import { createHash } from "crypto";
 
 function sha256(value: string): string {
@@ -9,27 +9,53 @@ function sha256(value: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log("Mangofy callback received:", JSON.stringify(body).slice(0, 500));
+    console.log("[MANGOFY CALLBACK] Received:", JSON.stringify(body).slice(0, 800));
 
     const { payment_code, external_code, payment_status, metadata } = body;
 
-    const sessionId = metadata?.session_id || external_code || payment_code;
+    // Try to find session by metadata.session_id first, then fallback to payment_code
+    let sessionId = metadata?.session_id;
 
     if (!sessionId) {
-      console.error("No session identifier found in callback");
+      // If no session_id in metadata, search all sessions by payment_code or external_code
+      console.log("[MANGOFY CALLBACK] No session_id in metadata, searching by payment_code:", payment_code);
+      // We'll need to add a helper to search sessions by paymentCode
+      sessionId = payment_code || external_code;
+    }
+
+    if (!sessionId) {
+      console.error("[MANGOFY CALLBACK] No identifier found");
       return NextResponse.json({ error: "Missing session identifier" }, { status: 400 });
     }
 
     if (payment_status === "approved") {
-      const session = updateSession(sessionId, {
+      // Try to find session by sessionId first, then by payment_code
+      let session = getSession(sessionId);
+
+      if (!session && payment_code) {
+        session = findSessionByPaymentCode(payment_code);
+        if (session) {
+          sessionId = session.id;
+          console.log(`[MANGOFY CALLBACK] Found session by payment_code: ${sessionId}`);
+        }
+      }
+
+      if (!session) {
+        console.error(`[MANGOFY CALLBACK] Session not found: ${sessionId}, payment_code: ${payment_code}`);
+        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      }
+
+      const updated = updateSession(sessionId, {
         status: "paid",
         paidAt: Date.now(),
       });
 
-      if (!session) {
-        console.error(`Session not found: ${sessionId}`);
-        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      if (!updated) {
+        console.error(`[MANGOFY CALLBACK] Failed to update session: ${sessionId}`);
+        return NextResponse.json({ error: "Failed to update session" }, { status: 500 });
       }
+
+      session = updated;
 
       console.log(`✅ Payment confirmed for session ${sessionId}`);
 

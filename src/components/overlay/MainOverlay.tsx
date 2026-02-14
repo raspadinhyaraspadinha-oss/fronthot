@@ -163,9 +163,16 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
       const utms = getStoredUTMs();
       const fbp = getFBP();
       const fbc = buildFBC(utms.fbclid);
+
+      // Simple bot check token (proves JS execution)
+      const botToken = btoa(`${Date.now()}-${Math.random()}-${navigator.userAgent.slice(0, 20)}`);
+
       const res = await fetch("/api/create-pix", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-bot-check": botToken,
+        },
         body: JSON.stringify({
           planId: plan.id,
           planName: plan.name,
@@ -231,9 +238,16 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
       const utms = getStoredUTMs();
       const fbp = getFBP();
       const fbc = buildFBC(utms.fbclid);
+
+      // Simple bot check token (proves JS execution)
+      const botToken = btoa(`${Date.now()}-${Math.random()}-${navigator.userAgent.slice(0, 20)}`);
+
       const res = await fetch("/api/create-pix", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-bot-check": botToken,
+        },
         body: JSON.stringify({ planId: plan.id, planName: plan.name, amount: plan.price, utms, fbc, fbp }),
       });
       const data = await res.json();
@@ -454,8 +468,12 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
                     {/* QR Code */}
                     {qrImage && (
                       <div className="mb-5 flex justify-center">
-                        <div className="rounded-[var(--radius-lg)] bg-white p-3">
-                          <img src={qrImage} alt="QR Code Pix" className="h-44 w-44 sm:h-52 sm:w-52" />
+                        <div className="rounded-[var(--radius-lg)] bg-white p-3 shadow-md">
+                          <img
+                            src={qrImage.startsWith("data:") ? qrImage : `data:image/png;base64,${qrImage}`}
+                            alt="QR Code Pix"
+                            className="h-44 w-44 sm:h-52 sm:w-52"
+                          />
                         </div>
                       </div>
                     )}
