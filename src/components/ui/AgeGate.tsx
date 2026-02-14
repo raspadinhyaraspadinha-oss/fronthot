@@ -7,12 +7,18 @@ interface AgeGateProps {
   onConfirm: () => void;
 }
 
+/**
+ * Age Gate — primeiro gatilho do funil.
+ * Psicologia: Comprometimento + Consistência (Cialdini).
+ * Ao clicar "Sim", o usuário faz um micro-compromisso que
+ * aumenta a probabilidade de continuar no funil.
+ */
 export default function AgeGate({ onConfirm }: AgeGateProps) {
   const [show, setShow] = useState(true);
 
   const handleConfirm = () => {
     setShow(false);
-    setTimeout(onConfirm, 400);
+    setTimeout(onConfirm, 350);
   };
 
   const handleDeny = () => {
@@ -26,64 +32,74 @@ export default function AgeGate({ onConfirm }: AgeGateProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4"
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-2xl p-5"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            initial={{ scale: 0.92, opacity: 0, y: 16 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="glass relative w-full max-w-md overflow-hidden rounded-[var(--radius-xl)] p-8 text-center shadow-[var(--shadow-xl)]"
+            exit={{ scale: 0.96, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 340, damping: 28 }}
+            className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900 shadow-2xl"
           >
-            {/* Icon */}
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 20 }}
-              className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-600"
-            >
-              <svg className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.959-1.333-2.73 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </motion.div>
-
-            {/* Title */}
-            <h2 className="mb-3 text-2xl font-bold text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-              Conteúdo Adulto
-            </h2>
-            <p className="mb-6 text-sm leading-relaxed text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-              Este site contém material explícito destinado exclusivamente para maiores de 18 anos.
-            </p>
-
-            {/* Question */}
-            <p className="mb-6 text-lg font-semibold text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-              Você tem 18 anos ou mais?
-            </p>
-
-            {/* Buttons */}
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleConfirm}
-                className="flex-1 rounded-[var(--radius-lg)] bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-shadow hover:shadow-xl"
+            {/* Conteúdo */}
+            <div className="px-6 pt-8 pb-6 text-center">
+              {/* Badge 18+ */}
+              <motion.div
+                initial={{ scale: 0, rotate: -12 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  delay: 0.15,
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 18,
+                }}
+                className="mx-auto mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-full bg-red-500/15 ring-1 ring-red-500/25"
               >
-                Sim, tenho 18+
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleDeny}
-                className="flex-1 rounded-[var(--radius-lg)] border-2 border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-transparent px-6 py-3.5 text-base font-semibold text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors hover:bg-[var(--color-surface2)] dark:hover:bg-[var(--color-surface2-dark)]"
-              >
-                Não
-              </motion.button>
+                <span className="text-[26px] font-black leading-none text-red-500">
+                  18+
+                </span>
+              </motion.div>
+
+              <h2 className="mb-2 text-xl font-bold tracking-tight text-white">
+                Conteúdo Restrito
+              </h2>
+              <p className="mb-7 text-[13px] leading-relaxed text-zinc-400">
+                Este site contém material explícito destinado exclusivamente
+                para maiores de 18 anos.
+              </p>
+
+              {/* Pergunta */}
+              <p className="mb-5 text-[15px] font-semibold text-zinc-200">
+                Você tem 18 anos ou mais?
+              </p>
+
+              {/* Botões — empilhados no mobile, lado a lado em sm+ */}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleConfirm}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 py-[14px] text-[15px] font-bold text-white shadow-lg shadow-red-500/20 transition-shadow active:shadow-none"
+                >
+                  Sim, tenho 18+
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleDeny}
+                  className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/60 py-[14px] text-[15px] font-semibold text-zinc-400 transition-colors active:bg-zinc-700"
+                >
+                  Não, sair
+                </motion.button>
+              </div>
             </div>
 
-            {/* Footer */}
-            <p className="mt-6 text-xs text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-              Ao continuar, você confirma que é maior de idade e aceita os termos de uso.
-            </p>
+            {/* Rodapé */}
+            <div className="border-t border-white/[0.05] px-6 py-3">
+              <p className="text-center text-[11px] leading-relaxed text-zinc-600">
+                Ao continuar, você confirma que é maior de idade e aceita os
+                termos de uso.
+              </p>
+            </div>
           </motion.div>
         </motion.div>
       )}

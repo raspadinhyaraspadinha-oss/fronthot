@@ -63,6 +63,15 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [copied, setCopied] = useState(false);
   const [paidPlanId, setPaidPlanId] = useState<string | null>(null);
+  const [qrSize, setQrSize] = useState(180);
+
+  /* responsive QR size */
+  useEffect(() => {
+    const update = () => setQrSize(window.innerWidth < 640 ? 176 : 208);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   /* reset on open */
   useEffect(() => {
@@ -481,7 +490,7 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
                         <div className="rounded-[var(--radius-lg)] bg-white p-3 shadow-md">
                           <QRCodeSVG
                             value={pixCode}
-                            size={window.innerWidth < 640 ? 176 : 208}
+                            size={qrSize}
                             level="M"
                             includeMargin={false}
                           />
