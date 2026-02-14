@@ -106,11 +106,18 @@ export async function POST(req: NextRequest) {
 
       if (mangofyRes.ok && data.payment_code) {
         paymentCode = data.payment_code;
-        // Mangofy retorna o PIX dentro de data.pix
+        // Mangofy retorna PIX em data.pix.pix_qrcode_text (código copia-cola)
         if (data.pix) {
-          pixCode = data.pix.qr_code || data.pix.qrcode || "";
+          pixCode = data.pix.pix_qrcode_text || data.pix.qr_code || "";
+          // QR code base64 vem em data.pix.qr_code_base64 (se existir)
           qrImage = data.pix.qr_code_base64 || data.pix.qrcode_base64 || "";
         }
+
+        console.log("[MANGOFY] Payment created successfully:", {
+          paymentCode,
+          hasPixCode: !!pixCode,
+          hasQrImage: !!qrImage,
+        });
       } else {
         console.error("[MANGOFY] Error response:", data);
         return NextResponse.json(
@@ -175,11 +182,17 @@ export async function POST(req: NextRequest) {
           : {}),
       };
 
+      console.log("[CAPI] Sending AddToCart event:", { eventId, value: amount / 100 });
       fetch(`${graphUrl}/${pixelId}/events?access_token=${accessToken}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(capiPayload),
-      }).catch((e) => console.error("CAPI AddToCart error:", e));
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("[CAPI] AddToCart response:", data))
+        .catch((e) => console.error("[CAPI] AddToCart error:", e));
+    } else {
+      console.warn("[CAPI] Facebook Pixel not configured, skipping AddToCart");
     }
 
     // ── 4. UTMify — waiting_payment ───────────────────────────
@@ -233,6 +246,7 @@ export async function POST(req: NextRequest) {
         isTest: false,
       };
 
+      console.log("[UTMify] Sending waiting_payment:", { orderId, value: amount });
       fetch(utmifyUrl, {
         method: "POST",
         headers: {
@@ -240,7 +254,12 @@ export async function POST(req: NextRequest) {
           "x-api-token": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
-      }).catch((e) => console.error("UTMify waiting_payment error:", e));
+      })
+        .then((res) => res.text())
+        .then((data) => console.log("[UTMify] waiting_payment response:", data.slice(0, 200)))
+        .catch((e) => console.error("[UTMify] waiting_payment error:", e));
+    } else {
+      console.warn("[UTMify] Not configured, skipping waiting_payment");
     }
 
     return NextResponse.json({

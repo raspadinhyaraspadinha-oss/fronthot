@@ -102,16 +102,19 @@ export async function POST(req: NextRequest) {
         };
 
         try {
+          console.log("[CAPI] Sending Purchase event:", { eventId, value: session.amount / 100 });
           const res = await fetch(`${graphUrl}/${pixelId}/events?access_token=${accessToken}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(capiPayload),
           });
           const result = await res.json();
-          console.log("CAPI Purchase result:", JSON.stringify(result));
+          console.log("[CAPI] Purchase response:", JSON.stringify(result));
         } catch (e) {
-          console.error("CAPI Purchase error:", e);
+          console.error("[CAPI] Purchase error:", e);
         }
+      } else {
+        console.warn("[CAPI] Facebook Pixel not configured, skipping Purchase");
       }
 
       // ── 2. UTMify — paid ────────────────────────────────────
@@ -164,15 +167,19 @@ export async function POST(req: NextRequest) {
         };
 
         try {
-          await fetch(utmifyUrl, {
+          console.log("[UTMify] Sending paid:", { orderId, value: session.amount });
+          const res = await fetch(utmifyUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-api-token": utmifyToken },
             body: JSON.stringify(utmifyPayload),
           });
-          console.log("UTMify paid sent for order:", orderId);
+          const text = await res.text();
+          console.log("[UTMify] paid response:", text.slice(0, 200));
         } catch (e) {
-          console.error("UTMify paid error:", e);
+          console.error("[UTMify] paid error:", e);
         }
+      } else {
+        console.warn("[UTMify] Not configured, skipping paid");
       }
     }
 

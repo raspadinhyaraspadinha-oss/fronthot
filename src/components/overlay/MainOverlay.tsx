@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 import { plans, type Plan } from "@/data/plans";
 import { previews, type Preview } from "@/data/previews";
 import PlanCard from "@/components/ui/PlanCard";
@@ -466,13 +467,14 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
                     </div>
 
                     {/* QR Code */}
-                    {qrImage && (
+                    {pixCode && (
                       <div className="mb-5 flex justify-center">
                         <div className="rounded-[var(--radius-lg)] bg-white p-3 shadow-md">
-                          <img
-                            src={qrImage.startsWith("data:") ? qrImage : `data:image/png;base64,${qrImage}`}
-                            alt="QR Code Pix"
-                            className="h-44 w-44 sm:h-52 sm:w-52"
+                          <QRCodeSVG
+                            value={pixCode}
+                            size={window.innerWidth < 640 ? 176 : 208}
+                            level="M"
+                            includeMargin={false}
                           />
                         </div>
                       </div>
