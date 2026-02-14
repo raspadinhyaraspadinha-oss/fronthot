@@ -12,6 +12,7 @@ import ProgressBar from "@/components/ui/ProgressBar";
 import { showToast } from "@/components/ui/Toast";
 import { getCredits, useCredit } from "@/lib/credits";
 import { getStoredUTMs, getFBP, buildFBC } from "@/lib/utm";
+import { trackClientEvent } from "@/lib/analytics";
 
 type OverlayView = "plans" | "preview" | "checkout" | "upsell";
 
@@ -115,6 +116,7 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
             setPaidPlanId(data.planId || selectedPlan);
             setView("upsell");
             showToast("Pagamento confirmado!", "success");
+            trackClientEvent("payment_completed", { planId: data.planId || selectedPlan });
           }
         } catch { /* ignore */ }
       }, 5000);
@@ -130,9 +132,15 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
   }, [usedPreviews]);
 
   /* ─── handlers ──────────────────────────────────────────── */
+  const handleSelectPlan = useCallback((planId: string) => {
+    setSelectedPlan(planId);
+    trackClientEvent("plan_selected", { planId });
+  }, []);
+
   const handleUseCredit = () => {
     const result = useCredit();
     if (result.success) {
+      trackClientEvent("credit_used", { remaining: result.remaining });
       setCredits(result.remaining);
       onCreditsChanged();
       const pv = pickPreview();
@@ -191,6 +199,7 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
       setPixTimerRunning(true);
       setCopied(false);
       setView("checkout");
+      trackClientEvent("pix_generated", { planId: plan.id, amount: plan.price });
     } catch {
       showToast("Erro ao gerar o Pix. Tente novamente.", "error");
     } finally {
@@ -344,7 +353,7 @@ export default function MainOverlay({ open, onClose, onCreditsChanged }: MainOve
                     <div className="mb-5 sm:mb-6">
                       <h2 className="mb-1 text-base font-semibold text-[var(--color-text)] dark:text-[var(--color-text-dark)]">Planos disponíveis</h2>
                       <p className="mb-3 text-xs text-[var(--color-muted)] dark:text-[var(--color-muted-dark)] sm:mb-4">Vagas quase completas — garanta a sua agora.</p>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} selected={selectedPlan === plan.id} onSelect={setSelectedPlan} />)}</div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} selected={selectedPlan === plan.id} onSelect={handleSelectPlan} />)}</div>
                     </div>
 
                     <div className="mb-5 rounded-[var(--radius-md)] bg-[var(--color-accent-light)]/60 dark:bg-[rgba(108,60,224,0.1)] px-4 py-2 text-center text-xs font-medium text-[var(--color-accent)] sm:mb-6 sm:py-2.5">Vagas quase completas — cancelamento a qualquer momento.</div>
